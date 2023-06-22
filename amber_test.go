@@ -2,6 +2,7 @@ package amber
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -14,6 +15,22 @@ func Test_Doctype(t *testing.T) {
 	} else {
 		expect(res, `<!DOCTYPE html>`, t)
 	}
+}
+
+func Test_Each(t *testing.T) {
+	res, err := generate(`each $a, $b, $c in values
+								#{$a}`)
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(strings.TrimSpace(res), `{{range $a,$b,$c := .values}}{{$a}}{{end}}`, t)
+	}
+}
+
+func Test_Calls(t *testing.T) {
+	res, _ := generate(`block a
+								+super`)
+	fmt.Println(res)
 }
 
 func Test_Nesting(t *testing.T) {
@@ -40,6 +57,22 @@ func Test_Mixin(t *testing.T) {
 		t.Fatal(err.Error())
 	} else {
 		expect(res, `<p>1</p>`, t)
+	}
+}
+
+func Test_Mixin_Loop(t *testing.T) {
+	res, err := run(`
+		mixin repeat($value, $from, $to)
+			#{$value}
+			if $from < $to
+				+repeat($value, $from+1, $to)
+
+		+repeat("a", 0, 3)`, nil)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `aaa`, t)
 	}
 }
 
@@ -452,7 +485,7 @@ func expect(cur, expected string, t *testing.T) {
 }
 
 func run(tpl string, data interface{}) (string, error) {
-	t, err := Compile(tpl, Options{false, false, nil})
+	t, err := Compile(tpl, Options{false, false, nil, nil})
 	if err != nil {
 		return "", err
 	}

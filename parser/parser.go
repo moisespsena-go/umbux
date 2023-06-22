@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"path/filepath"
 	"strings"
 )
 
+type FileSystem interface {
+	Open(name string) (io.ReadCloser, error)
+}
+
 type Parser struct {
 	scanner      *scanner
 	filename     string
-	fs           http.FileSystem
+	fs           FileSystem
 	currenttoken *token
 	namedBlocks  map[string]*NamedBlock
 	parent       *Parser
@@ -39,7 +42,7 @@ func (p *Parser) SetFilename(filename string) {
 	p.filename = filename
 }
 
-func (p *Parser) SetVirtualFilesystem(fs http.FileSystem) {
+func (p *Parser) SetVirtualFilesystem(fs FileSystem) {
 	p.fs = fs
 }
 
@@ -55,13 +58,13 @@ func FileParser(filename string) (*Parser, error) {
 	return parser, nil
 }
 
-func VirtualFileParser(filename string, fs http.FileSystem) (*Parser, error) {
+func VirtualFileParser(filename string, fs FileSystem) (*Parser, error) {
 	file, err := fs.Open(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +158,9 @@ func (p *Parser) parseRelativeFile(filename string) *Parser {
 		panic("Unable to import or extend " + filename + " in a non filesystem based parser.")
 	}
 
-	filename = filepath.Join(filepath.Dir(p.filename), filename)
+	if filename[0] != '/' {
+		filename = filepath.Join(filepath.Dir(p.filename), filename)
+	}
 
 	if strings.IndexRune(filepath.Base(filename), '.') < 0 {
 		filename = filename + ".amber"
@@ -306,8 +311,7 @@ func (p *Parser) parseEach() *Each {
 	tok := p.expect(tokEach)
 	ech := newEach(tok.Value)
 	ech.SourcePosition = p.pos()
-	ech.X = tok.Data["X"]
-	ech.Y = tok.Data["Y"]
+	ech.Args = tok.Data["args"]
 
 	if p.currenttoken.Kind == tokIndent {
 		ech.Block = p.parseBlock(ech)

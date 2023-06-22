@@ -37,9 +37,24 @@ func runtime_add(x, y interface{}) interface{} {
 				return fmt.Sprintf("%d%s", vx.Int(), vy.String())
 			}
 		}
+	case reflect.Uint, reflect.Uint32, reflect.Uint64, reflect.Uint16, reflect.Uint8:
+		{
+			switch vy.Kind() {
+			case reflect.Uint, reflect.Uint32, reflect.Uint64, reflect.Uint16, reflect.Uint8:
+				return vx.Uint() + vx.Uint()
+			case reflect.Int, reflect.Int32, reflect.Int64, reflect.Int16, reflect.Int8:
+				return int64(vx.Uint()) + vy.Int()
+			case reflect.Float32, reflect.Float64:
+				return float64(vx.Uint()) + vy.Float()
+			case reflect.String:
+				return fmt.Sprintf("%d%s", vx.Uint(), vy.String())
+			}
+		}
 	case reflect.Float32, reflect.Float64:
 		{
 			switch vy.Kind() {
+			case reflect.Uint, reflect.Uint32, reflect.Uint64, reflect.Uint16, reflect.Uint8:
+				return vx.Float() + float64(vx.Uint())
 			case reflect.Int, reflect.Int32, reflect.Int64, reflect.Int16, reflect.Int8:
 				return vx.Float() + float64(vy.Int())
 			case reflect.Float32, reflect.Float64:
@@ -51,6 +66,8 @@ func runtime_add(x, y interface{}) interface{} {
 	case reflect.String:
 		{
 			switch vy.Kind() {
+			case reflect.Uint, reflect.Uint32, reflect.Uint64, reflect.Uint16, reflect.Uint8:
+				return fmt.Sprintf("%s%d", vx.String(), vy.Uint())
 			case reflect.Int, reflect.Int32, reflect.Int64, reflect.Int16, reflect.Int8:
 				return fmt.Sprintf("%s%d", vx.String(), vy.Int())
 			case reflect.Float32, reflect.Float64:
@@ -270,6 +287,10 @@ func runtime_lss(x, y interface{}) bool {
 	}
 
 	return false
+}
+
+func runtime_globals() (any, error) {
+	return nil, fmt.Errorf("__amber_globals function is not set in your funcmap")
 }
 
 func runtime_gtr(x, y interface{}) bool {

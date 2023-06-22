@@ -203,8 +203,7 @@ func newCondition(exp string) *Condition {
 
 type Each struct {
 	SourcePosition
-	X          string
-	Y          string
+	Args       string
 	Expression string
 	Block      *Block
 }

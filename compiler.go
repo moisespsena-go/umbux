@@ -10,7 +10,6 @@ import (
 	gt "go/token"
 	"html/template"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -21,6 +20,8 @@ import (
 
 	"github.com/eknkc/amber/parser"
 )
+
+type FileSystem = parser.FileSystem
 
 var builtinFunctions = [...]string{
 	"len",
@@ -42,8 +43,9 @@ const (
 // Compiler is the main interface of Amber Template Engine.
 // In order to use an Amber template, it is required to create a Compiler and
 // compile an Amber source to native Go template.
+//
 //	compiler := amber.New()
-// 	// Parse the input file
+//	// Parse the input file
 //	err := compiler.ParseFile("./input.amber")
 //	if err == nil {
 //		// Compile input file to Go template
@@ -60,9 +62,10 @@ type Compiler struct {
 	node         parser.Node
 	indentLevel  int
 	newline      bool
-	buffer       *bytes.Buffer
+	writer       *writer
 	tempvarIndex int
 	mixins       map[string]*parser.Mixin
+	visited      map[uintptr]any
 }
 
 // New creates and initialize a new Compiler.
@@ -91,7 +94,11 @@ type Options struct {
 	// Setting the virtual filesystem to use
 	// If set, will attempt to use a virtual filesystem provided instead of os.
 	// Default: nil
-	VirtualFilesystem http.FileSystem
+	VirtualFilesystem FileSystem
+	// Setting Builtin funcs names
+	// If set, when identifier matches key, disable to DIT convertion.
+	// Default: nil
+	BuiltinFuncsNames map[string]any
 }
 
 // DirOptions is used to provide options to directory compilation.
@@ -103,7 +110,7 @@ type DirOptions struct {
 }
 
 // DefaultOptions sets pretty-printing to true and line numbering to false.
-var DefaultOptions = Options{true, false, nil}
+var DefaultOptions = Options{true, false, nil, nil}
 
 // DefaultDirOptions sets expected file extension to ".amber" and recursive search for templates within a directory to true.
 var DefaultDirOptions = DirOptions{".amber", true}
@@ -120,6 +127,32 @@ func Compile(input string, options Options) (*template.Template, error) {
 	}
 
 	return comp.Compile()
+}
+
+// CompileToString parses and compiles the supplied amber template string.
+// Necessary runtime functions will be injected and the template will be ready to be executed.
+func CompileToString(input string, options Options) (compiled string, err error) {
+	comp := New()
+	comp.Options = options
+
+	if err = comp.Parse(input); err != nil {
+		return
+	}
+
+	return comp.CompileString()
+}
+
+// CompileToWriter parses and compiles the supplied amber template.
+// Necessary runtime functions will be injected and the template will be ready to be executed.
+func CompileToWriter(dst io.Writer, input string, options Options) (err error) {
+	comp := New()
+	comp.Options = options
+
+	if err = comp.Parse(input); err != nil {
+		return
+	}
+
+	return comp.CompileWriter(dst)
 }
 
 // Compile parses and compiles the supplied amber template []byte.
@@ -335,14 +368,14 @@ func (c *Compiler) CompileWriter(out io.Writer) (err error) {
 		}
 	}()
 
-	c.buffer = new(bytes.Buffer)
+	c.writer = &writer{Writer: out}
+	c.visited = map[uintptr]any{}
 	c.visit(c.node)
 
-	if c.buffer.Len() > 0 {
+	if c.writer.len > 0 {
 		c.write("\n")
 	}
 
-	_, err = c.buffer.WriteTo(out)
 	return
 }
 
@@ -403,7 +436,7 @@ func (c *Compiler) visit(node parser.Node) {
 }
 
 func (c *Compiler) write(value string) {
-	c.buffer.WriteString(value)
+	c.writer.Write([]byte(value))
 }
 
 func (c *Compiler) indent(offset int, newline bool) {
@@ -411,7 +444,7 @@ func (c *Compiler) indent(offset int, newline bool) {
 		return
 	}
 
-	if newline && c.buffer.Len() > 0 {
+	if newline && c.writer.len > 0 {
 		c.write("\n")
 	}
 
@@ -474,10 +507,10 @@ func (c *Compiler) visitEach(each *parser.Each) {
 		return
 	}
 
-	if len(each.Y) == 0 {
-		c.write(`{{range ` + each.X + ` := ` + c.visitRawInterpolation(each.Expression) + `}}`)
+	if len(each.Args) == 0 {
+		c.write(`{{range ` + c.visitRawInterpolation(each.Expression) + `}}`)
 	} else {
-		c.write(`{{range ` + each.X + `, ` + each.Y + ` := ` + c.visitRawInterpolation(each.Expression) + `}}`)
+		c.write(`{{range ` + each.Args + ` := ` + c.visitRawInterpolation(each.Expression) + `}}`)
 	}
 	c.visitBlock(each.Block)
 	c.write(`{{end}}`)
@@ -653,52 +686,45 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 				exec(be.Y)
 				exec(be.X)
 
-				negate := false
-				name := c.tempvar()
-				c.write(`{{` + name + ` := `)
+				pf := func(v string) {
+					stack.PushFront("(" + v + ")")
+				}
 
 				switch be.Op {
 				case gt.ADD:
-					c.write("__amber_add ")
+					pf(pop() + ` + ` + pop())
 				case gt.SUB:
-					c.write("__amber_sub ")
+					pf(pop() + ` - ` + pop())
 				case gt.MUL:
-					c.write("__amber_mul ")
+					pf(pop() + ` * ` + pop())
 				case gt.QUO:
-					c.write("__amber_quo ")
+					// div
+					pf(pop() + ` / ` + pop())
 				case gt.REM:
-					c.write("__amber_rem ")
+					// mod
+					pf(pop() + ` % ` + pop())
+					return
+				case gt.XOR:
+					// pow
+					pf(pop() + ` ^ ` + pop())
 				case gt.LAND:
-					c.write("and ")
+					pf("and " + pop() + ` ` + pop())
 				case gt.LOR:
-					c.write("or ")
+					pf("or " + pop() + ` ` + pop())
 				case gt.EQL:
-					c.write("__amber_eql ")
+					pf("eq " + pop() + ` ` + pop())
 				case gt.NEQ:
-					c.write("__amber_eql ")
-					negate = true
+					pf("ne " + pop() + ` ` + pop())
 				case gt.LSS:
-					c.write("__amber_lss ")
+					pf("lt " + pop() + ` ` + pop())
 				case gt.GTR:
-					c.write("__amber_gtr ")
+					pf("gt " + pop() + ` ` + pop())
 				case gt.LEQ:
-					c.write("__amber_gtr ")
-					negate = true
+					pf("le " + pop() + ` ` + pop())
 				case gt.GEQ:
-					c.write("__amber_lss ")
-					negate = true
+					pf("ge " + pop() + ` ` + pop())
 				default:
 					panic("Unexpected operator!")
-				}
-
-				c.write(pop() + ` ` + pop() + `}}`)
-
-				if !negate {
-					stack.PushFront(name)
-				} else {
-					negname := c.tempvar()
-					c.write(`{{` + negname + ` := not ` + name + `}}`)
-					stack.PushFront(negname)
 				}
 			}
 		case *ast.UnaryExpr:
@@ -707,22 +733,16 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 
 				exec(ue.X)
 
-				name := c.tempvar()
-				c.write(`{{` + name + ` := `)
-
 				switch ue.Op {
 				case gt.SUB:
-					c.write("__amber_minus ")
+					stack.PushFront("-" + pop())
 				case gt.ADD:
-					c.write("__amber_plus ")
+					stack.PushFront("+" + pop())
 				case gt.NOT:
-					c.write("not ")
+					stack.PushFront("(not " + pop() + ")")
 				default:
 					panic("Unexpected operator!")
 				}
-
-				c.write(pop() + `}}`)
-				stack.PushFront(name)
 			}
 		case *ast.ParenExpr:
 			exec(expr.X)
@@ -762,16 +782,16 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 			builtin := false
 
 			if ident, ok := ce.Fun.(*ast.Ident); ok {
-				for _, fname := range builtinFunctions {
-					if fname == ident.Name {
-						builtin = true
-						break
-					}
-				}
-				for fname, _ := range FuncMap {
-					if fname == ident.Name {
-						builtin = true
-						break
+				if _, ok := FuncMap[ident.Name]; ok {
+					builtin = true
+				} else if _, ok := c.BuiltinFuncsNames[ident.Name]; ok {
+					builtin = true
+				} else {
+					for _, fname := range builtinFunctions {
+						if fname == ident.Name {
+							builtin = true
+							break
+						}
 					}
 				}
 			}
@@ -811,7 +831,22 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 }
 
 func (c *Compiler) visitMixin(mixin *parser.Mixin) {
+	if _, ok := c.mixins[mixin.Name]; ok {
+		panic(fmt.Sprintf(
+			"mixin duplicate %q",
+			mixin.Name,
+		))
+	}
+
 	c.mixins[mixin.Name] = mixin
+	c.write(`{{define "` + mixin.Name + `"`)
+	for _, arg := range mixin.Args {
+		c.write(" ")
+		c.write(arg)
+	}
+	c.write("}}")
+	c.visitBlock(mixin.Block)
+	c.write(`{{end}}`)
 }
 
 func (c *Compiler) visitMixinCall(mixinCall *parser.MixinCall) {
@@ -837,8 +872,15 @@ func (c *Compiler) visitMixinCall(mixinCall *parser.MixinCall) {
 		))
 	}
 
-	for i, arg := range mixin.Args {
-		c.write(fmt.Sprintf(`{{%s := %s}}`, arg, c.visitRawInterpolation(mixinCall.Args[i])))
+	args := make([]string, len(mixinCall.Args))
+
+	for i, arg := range mixinCall.Args {
+		args[i] = c.visitRawInterpolation(arg)
 	}
-	c.visitBlock(mixin.Block)
+	c.write(`{{template "` + mixin.Name + `" .`)
+	for _, arg := range args {
+		c.write(" ")
+		c.write(arg)
+	}
+	c.write(`}}`)
 }

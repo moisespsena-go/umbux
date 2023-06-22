@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -29,6 +30,7 @@ const (
 	tokExtends
 	tokMixin
 	tokMixinCall
+	tokGlobal
 )
 
 const (
@@ -298,12 +300,12 @@ func (s *scanner) scanCondition() *token {
 	return nil
 }
 
-var rgxEach = regexp.MustCompile(`^each\s+(\$[\w0-9\-_]*)(?:\s*,\s*(\$[\w0-9\-_]*))?\s+in\s+(.+)$`)
+var rgxEach = regexp.MustCompile(`^each\s+((\$[\w0-9\-_]*)(?:\s*,\s*(\$[\w0-9\-_]*))*)\s+in\s+(.+)$`)
 
 func (s *scanner) scanEach() *token {
 	if sm := rgxEach.FindStringSubmatch(s.buffer); len(sm) != 0 {
 		s.consume(len(sm[0]))
-		return &token{tokEach, sm[3], map[string]string{"X": sm[1], "Y": sm[2]}}
+		return &token{tokEach, sm[4], map[string]string{"args": strings.ReplaceAll(sm[1], " ", "")}}
 	}
 
 	return nil
