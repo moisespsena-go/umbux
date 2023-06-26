@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	amber "github.com/eknkc/amber"
+	"github.com/moisespsena-go/umbux"
 )
 
 var prettyPrint bool
@@ -25,11 +25,11 @@ func main() {
 	// input := flag.Arg(0)
 
 	// if len(input) == 0 {
-	//	fmt.Fprintln(os.Stderr, "Please provide an input file. (amberc input.amber)")
+	//	fmt.Fprintln(os.Stderr, "Please provide an input file. (umbuxc input.umbux)")
 	//	os.Exit(1)
 	// }
 
-	cmp := amber.New()
+	cmp := umbux.New()
 	cmp.PrettyPrint = prettyPrint
 	cmp.LineNumbers = lineNumbers
 

@@ -1,23 +1,24 @@
-package amber
+package umbux
 
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"reflect"
+
+	"github.com/moisespsena-go/umbu/html/template"
 )
 
 var FuncMap = template.FuncMap{
-	"__amber_add":   runtime_add,
-	"__amber_sub":   runtime_sub,
-	"__amber_mul":   runtime_mul,
-	"__amber_quo":   runtime_quo,
-	"__amber_rem":   runtime_rem,
-	"__amber_minus": runtime_minus,
-	"__amber_plus":  runtime_plus,
-	"__amber_eql":   runtime_eql,
-	"__amber_gtr":   runtime_gtr,
-	"__amber_lss":   runtime_lss,
+	"__umbux_add":   runtime_add,
+	"__umbux_sub":   runtime_sub,
+	"__umbux_mul":   runtime_mul,
+	"__umbux_quo":   runtime_quo,
+	"__umbux_rem":   runtime_rem,
+	"__umbux_minus": runtime_minus,
+	"__umbux_plus":  runtime_plus,
+	"__umbux_eql":   runtime_eql,
+	"__umbux_gtr":   runtime_gtr,
+	"__umbux_lss":   runtime_lss,
 
 	"json":      runtime_json,
 	"unescaped": runtime_unescaped,
@@ -290,7 +291,7 @@ func runtime_lss(x, y interface{}) bool {
 }
 
 func runtime_globals() (any, error) {
-	return nil, fmt.Errorf("__amber_globals function is not set in your funcmap")
+	return nil, fmt.Errorf("__umbux_globals function is not set in your funcmap")
 }
 
 func runtime_gtr(x, y interface{}) bool {

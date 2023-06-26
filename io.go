@@ -1,4 +1,4 @@
-package amber
+package umbux
 
 import "io"
 

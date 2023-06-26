@@ -1,11 +1,11 @@
-# amber [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/eknkc/amber) [![Build Status](https://travis-ci.org/eknkc/amber.svg?branch=master)](https://travis-ci.org/eknkc/amber)
+# umbux [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/moisespsena-go/umbux) [![Build Status](https://travis-ci.org/moisespsena-go/umbux.svg?branch=master)](https://travis-ci.org/moisespsena-go/umbux)
 
 ## Notice
 > While Amber is perfectly fine and stable to use, I've been working on a direct Pug.js port for Go. It is somewhat hacky at the moment but take a look at [Pug.go](https://github.com/eknkc/pug) if you are looking for a [Pug.js](https://github.com/pugjs/pug) compatible Go template engine.
 
 ### Usage
 ```go
-import "github.com/eknkc/amber"
+import "github.com/moisespsena-go/umbux"
 ```
 
 Amber is an elegant templating engine for Go Programming Language
@@ -106,7 +106,7 @@ executed with following JSON data:
   "Name": "Ekin",
   "LastName": "Koc",
   "Repositories": [
-    "amber",
+    "umbux",
     "dateformat"
   ],
   "Avatar": "/images/ekin.jpg",
@@ -200,7 +200,7 @@ It is possible to iterate over arrays and maps using `each`:
 
 would print
 
-    p amber
+    p umbux
     p dateformat
 
 It is also possible to iterate over values and indexes at the same time
@@ -234,13 +234,13 @@ Template data, variables, expressions, etc., can all be passed as arguments:
 
 A template can import other templates using `import`:
 
-    a.amber
+    a.ubx
         p this is template a
 
-    b.amber
+    b.ubx
         p this is template b
 
-    c.amber
+    c.ubx
         div
             import a
             import b
@@ -256,7 +256,7 @@ gets compiled to
 A template can inherit other templates. In order to inherit another template, an `extends` keyword should be used.
 Parent template can define several named blocks and child template can modify the blocks.
 
-    master.amber
+    master.ubx
         !!! 5
         html
             head
@@ -269,7 +269,7 @@ Parent template can define several named blocks and child template can modify th
             body
                 block content
 
-    subpage.amber
+    subpage.ubx
         extends master
 
         block title
@@ -299,7 +299,7 @@ THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ```go
 var DefaultOptions = Options{true, false}
-var DefaultDirOptions = DirOptions{".amber", true}
+var DefaultDirOptions = DirOptions{".ubx", true}
 ```
 
 #### func  Compile
@@ -307,8 +307,8 @@ var DefaultDirOptions = DirOptions{".amber", true}
 ```go
 func Compile(input string, options Options) (*template.Template, error)
 ```
-Parses and compiles the supplied amber template string. Returns corresponding Go
-Template (html/templates) instance. Necessary runtime functions will be injected
+Parses and compiles the supplied umbux template string. Returns corresponding Go
+Template (github.com/moisespsena-go/umbu/html/templates) instance. Necessary runtime functions will be injected
 and the template will be ready to be executed.
 
 #### func  CompileFile
@@ -317,28 +317,28 @@ and the template will be ready to be executed.
 func CompileFile(filename string, options Options) (*template.Template, error)
 ```
 Parses and compiles the contents of supplied filename. Returns corresponding Go
-Template (html/templates) instance. Necessary runtime functions will be injected
+Template (github.com/moisespsena-go/umbu/html/templates) instance. Necessary runtime functions will be injected
 and the template will be ready to be executed.
 
 #### func  CompileDir
 ```go
 func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*template.Template, error)
 ```
-Parses and compiles the contents of a supplied directory name. Returns a mapping of template name (extension stripped) to corresponding Go Template (html/template) instance. Necessary runtime functions will be injected and the template will be ready to be executed.
+Parses and compiles the contents of a supplied directory name. Returns a mapping of template name (extension stripped) to corresponding Go Template (github.com/moisespsena-go/umbu/html/template) instance. Necessary runtime functions will be injected and the template will be ready to be executed.
 
 If there are templates in subdirectories, its key in the map will be it's path relative to `dirname`. For example:
 ```
 templates/
-   |-- index.amber
+   |-- index.ubx
    |-- layouts/
-         |-- base.amber
+         |-- base.ubx
 ```
 ```go
-templates, err := amber.CompileDir("templates/", amber.DefaultDirOptions, amber.DefaultOptions)
-templates["index"] // index.amber Go Template
-templates["layouts/base"] // base.amber Go Template
+templates, err := umbux.CompileDir("templates/", umbux.DefaultDirOptions, umbux.DefaultOptions)
+templates["index"] // index.umbux Go Template
+templates["layouts/base"] // base.umbux Go Template
 ```
-By default, the search will be recursive and will match only files ending in ".amber". If recursive is turned off, it will only search the top level of the directory. Specified extension must start with a period.
+By default, the search will be recursive and will match only files ending in ".ubx". If recursive is turned off, it will only search the top level of the directory. Specified extension must start with a period.
 
 #### type Compiler
 
@@ -353,14 +353,14 @@ Compiler is the main interface of Amber Template Engine. In order to use an
 Amber template, it is required to create a Compiler and compile an Amber source
 to native Go template.
 
-    compiler := amber.New()
+    compiler := umbux.New()
     // Parse the input file
-    err := compiler.ParseFile("./input.amber")
+    err := compiler.ParseFile("./input.ubx")
     if err == nil {
     	// Compile input file to Go template
     	tpl, err := compiler.Compile()
     	if err == nil {
-    		// Check built in html/template documentation for further details
+    		// Check built in github.com/moisespsena-go/umbu/html/template documentation for further details
     		tpl.Execute(os.Stdout, somedata)
     	}
     }
@@ -377,7 +377,7 @@ Create and initialize a new Compiler
 ```go
 func (c *Compiler) Compile() (*template.Template, error)
 ```
-Compile amber and create a Go Template (html/templates) instance. Necessary
+Compile umbux and create a Go Template (github.com/moisespsena-go/umbu/html/templates) instance. Necessary
 runtime functions will be injected and the template will be ready to be
 executed.
 
@@ -395,7 +395,7 @@ template instance directly.
 ```go
 func (c *Compiler) CompileWriter(out io.Writer) (err error)
 ```
-Compile amber and write the Go Template source into given io.Writer instance You
+Compile umbux and write the Go Template source into given io.Writer instance You
 would not be using this unless debugging / checking the output. Please use
 Compile method to obtain a template instance directly.
 
@@ -404,14 +404,14 @@ Compile method to obtain a template instance directly.
 ```go
 func (c *Compiler) Parse(input string) (err error)
 ```
-Parse given raw amber template string.
+Parse given raw umbux template string.
 
 #### func (*Compiler) ParseFile
 
 ```go
 func (c *Compiler) ParseFile(filename string) (err error)
 ```
-Parse the amber template file in given path
+Parse the umbux template file in given path
 
 #### type Options
 

@@ -163,7 +163,7 @@ func (p *Parser) parseRelativeFile(filename string) *Parser {
 	}
 
 	if strings.IndexRune(filepath.Base(filename), '.') < 0 {
-		filename = filename + ".amber"
+		filename = filename + ".ubx"
 	}
 
 	parser, err := FileParser(filename)

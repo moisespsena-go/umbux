@@ -1,4 +1,4 @@
-package amber
+package umbux
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"go/ast"
 	gp "go/parser"
 	gt "go/token"
-	"html/template"
 	"io"
 	"os"
 	"path/filepath"
@@ -18,7 +17,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/eknkc/amber/parser"
+	"github.com/moisespsena-go/umbu/html/template"
+
+	"github.com/moisespsena-go/umbux/parser"
 )
 
 type FileSystem = parser.FileSystem
@@ -44,14 +45,14 @@ const (
 // In order to use an Amber template, it is required to create a Compiler and
 // compile an Amber source to native Go template.
 //
-//	compiler := amber.New()
+//	compiler := umbux.New()
 //	// Parse the input file
-//	err := compiler.ParseFile("./input.amber")
+//	err := compiler.ParseFile("./input.ubx")
 //	if err == nil {
 //		// Compile input file to Go template
 //		tpl, err := compiler.Compile()
 //		if err == nil {
-//			// Check built in html/template documentation for further details
+//			// Check built in github.com/moisespsena-go/umbu/html/template documentation for further details
 //			tpl.Execute(os.Stdout, somedata)
 //		}
 //	}
@@ -112,10 +113,10 @@ type DirOptions struct {
 // DefaultOptions sets pretty-printing to true and line numbering to false.
 var DefaultOptions = Options{true, false, nil, nil}
 
-// DefaultDirOptions sets expected file extension to ".amber" and recursive search for templates within a directory to true.
-var DefaultDirOptions = DirOptions{".amber", true}
+// DefaultDirOptions sets expected file extension to ".ubx" and recursive search for templates within a directory to true.
+var DefaultDirOptions = DirOptions{".ubx", true}
 
-// Compile parses and compiles the supplied amber template string. Returns corresponding Go Template (html/templates) instance.
+// Compile parses and compiles the supplied umbux template string. Returns corresponding Go Template (github.com/moisespsena-go/umbu/html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func Compile(input string, options Options) (*template.Template, error) {
 	comp := New()
@@ -129,7 +130,7 @@ func Compile(input string, options Options) (*template.Template, error) {
 	return comp.Compile()
 }
 
-// CompileToString parses and compiles the supplied amber template string.
+// CompileToString parses and compiles the supplied umbux template string.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func CompileToString(input string, options Options) (compiled string, err error) {
 	comp := New()
@@ -142,7 +143,7 @@ func CompileToString(input string, options Options) (compiled string, err error)
 	return comp.CompileString()
 }
 
-// CompileToWriter parses and compiles the supplied amber template.
+// CompileToWriter parses and compiles the supplied umbux template.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func CompileToWriter(dst io.Writer, input string, options Options) (err error) {
 	comp := New()
@@ -155,8 +156,8 @@ func CompileToWriter(dst io.Writer, input string, options Options) (err error) {
 	return comp.CompileWriter(dst)
 }
 
-// Compile parses and compiles the supplied amber template []byte.
-// Returns corresponding Go Template (html/templates) instance.
+// Compile parses and compiles the supplied umbux template []byte.
+// Returns corresponding Go Template (github.com/moisespsena-go/umbu/html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func CompileData(input []byte, filename string, options Options) (*template.Template, error) {
 	comp := New()
@@ -179,7 +180,7 @@ func MustCompile(input string, options Options) *template.Template {
 	return t
 }
 
-// CompileFile parses and compiles the contents of supplied filename. Returns corresponding Go Template (html/templates) instance.
+// CompileFile parses and compiles the contents of supplied filename. Returns corresponding Go Template (github.com/moisespsena-go/umbu/html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func CompileFile(filename string, options Options) (*template.Template, error) {
 	comp := New()
@@ -204,7 +205,7 @@ func MustCompileFile(filename string, options Options) *template.Template {
 
 // CompileDir parses and compiles the contents of a supplied directory path, with options.
 // Returns a map of a template identifier (key) to a Go Template instance.
-// Ex: if the dirname="templates/" had a file "index.amber" the key would be "index"
+// Ex: if the dirname="templates/" had a file "index.ubx" the key would be "index"
 // If option for recursive is True, this parses every file of relevant extension
 // in all subdirectories. The key then is the path e.g: "layouts/layout"
 func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*template.Template, error) {
@@ -227,7 +228,7 @@ func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*templ
 
 	compiled := make(map[string]*template.Template)
 	for _, file := range files {
-		// filename is for example "index.amber"
+		// filename is for example "index.ubx"
 		filename := file.Name()
 		fileext := filepath.Ext(filename)
 
@@ -269,7 +270,7 @@ func MustCompileDir(dirname string, dopt DirOptions, opt Options) map[string]*te
 	return m
 }
 
-// Parse given raw amber template string.
+// Parse given raw umbux template string.
 func (c *Compiler) Parse(input string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -287,7 +288,7 @@ func (c *Compiler) Parse(input string) (err error) {
 	return
 }
 
-// Parse given raw amber template bytes, and the filename that belongs with it
+// Parse given raw umbux template bytes, and the filename that belongs with it
 func (c *Compiler) ParseData(input []byte, filename string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -309,7 +310,7 @@ func (c *Compiler) ParseData(input []byte, filename string) (err error) {
 	return
 }
 
-// ParseFile parses the amber template file in given path.
+// ParseFile parses the umbux template file in given path.
 func (c *Compiler) ParseFile(filename string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -330,7 +331,7 @@ func (c *Compiler) ParseFile(filename string) (err error) {
 	return
 }
 
-// Compile amber and create a Go Template (html/templates) instance.
+// Compile umbux and create a Go Template (github.com/moisespsena-go/umbu/html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func (c *Compiler) Compile() (*template.Template, error) {
 	return c.CompileWithName(filepath.Base(c.filename))
@@ -349,7 +350,7 @@ func (c *Compiler) CompileWithTemplate(t *template.Template) (*template.Template
 		return nil, err
 	}
 
-	tpl, err := t.Funcs(FuncMap).Parse(data)
+	tpl, err := t.Parse(data)
 
 	if err != nil {
 		return nil, err
@@ -358,7 +359,7 @@ func (c *Compiler) CompileWithTemplate(t *template.Template) (*template.Template
 	return tpl, nil
 }
 
-// CompileWriter compiles amber and writes the Go Template source into given io.Writer instance.
+// CompileWriter compiles umbux and writes the Go Template source into given io.Writer instance.
 // You would not be using this unless debugging / checking the output. Please use Compile
 // method to obtain a template instance directly.
 func (c *Compiler) CompileWriter(out io.Writer) (err error) {
@@ -455,7 +456,7 @@ func (c *Compiler) indent(offset int, newline bool) {
 
 func (c *Compiler) tempvar() string {
 	c.tempvarIndex++
-	return "$__amber_" + strconv.Itoa(c.tempvarIndex)
+	return "$__umbux_" + strconv.Itoa(c.tempvarIndex)
 }
 
 func (c *Compiler) escape(input string) string {

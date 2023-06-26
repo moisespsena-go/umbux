@@ -1,4 +1,4 @@
-package amber
+package umbux
 
 import (
 	"bytes"
@@ -417,7 +417,7 @@ func Failing_Test_CompileDir(t *testing.T) {
 	expect(doc1.String(), doc2.String(), t)
 
 	// Check against CompileFile
-	compilefile, err := CompileFile("samples/basic.amber", DefaultOptions)
+	compilefile, err := CompileFile("samples/basic.ubx", DefaultOptions)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -498,7 +498,7 @@ func run(tpl string, data interface{}) (string, error) {
 
 func generate(tpl string) (string, error) {
 	c := New()
-	if err := c.ParseData([]byte(tpl), "test.amber"); err != nil {
+	if err := c.ParseData([]byte(tpl), "test.ubx"); err != nil {
 		return "", err
 	}
 	return c.CompileString()
