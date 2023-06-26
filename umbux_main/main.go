@@ -1,9 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"os"
+
+	"github.com/moisespsena-go/umbux"
 )
 
 func main() {
-	umbux.CompileToWriter(os.Stdout, `#{1 ? 2 : 3}`, umbux.Options{false, false, nil, nil})
+	tfs := umbux.NewTemplateFS(umbux.NewFinderFS(os.DirFS(".")), umbux.NoCache, umbux.Options{false, false, nil})
+	if t, err := tfs.Open("teste.umbux"); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(t.Execute(os.Stdout, map[string]any{"items": []string{"a", "b"}}))
+	}
 }

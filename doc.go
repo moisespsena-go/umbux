@@ -115,7 +115,7 @@ would print
 
 # Expressions
 
-Amber can expand basic expressions. For example, it is possible to concatenate strings with + operator:
+Umbux can expand basic expressions. For example, it is possible to concatenate strings with + operator:
 
 	p Welcome #{Name + " " + LastName}
 

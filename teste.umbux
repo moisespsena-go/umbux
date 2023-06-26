@@ -1,0 +1,6 @@
+mixin item(a)
+    li= a
+
+ul
+    each a in items
+        +item(a)

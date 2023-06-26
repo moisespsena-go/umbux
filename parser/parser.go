@@ -82,16 +82,16 @@ func (p *Parser) Parse() *Block {
 
 	defer func() {
 		if r := recover(); r != nil {
-			if rs, ok := r.(string); ok && rs[:len("Amber Error")] == "Amber Error" {
+			if rs, ok := r.(string); ok && rs[:len("Umbux Error")] == "Umbux Error" {
 				panic(r)
 			}
 
 			pos := p.pos()
 
 			if len(pos.Filename) > 0 {
-				panic(fmt.Sprintf("Amber Error in <%s>: %v - Line: %d, Column: %d, Length: %d", pos.Filename, r, pos.LineNum, pos.ColNum, pos.TokenLength))
+				panic(fmt.Sprintf("Umbux Error in <%s>: %v - Line: %d, Column: %d, Length: %d", pos.Filename, r, pos.LineNum, pos.ColNum, pos.TokenLength))
 			} else {
-				panic(fmt.Sprintf("Amber Error: %v - Line: %d, Column: %d, Length: %d", r, pos.LineNum, pos.ColNum, pos.TokenLength))
+				panic(fmt.Sprintf("Umbux Error: %v - Line: %d, Column: %d, Length: %d", r, pos.LineNum, pos.ColNum, pos.TokenLength))
 			}
 		}
 	}()

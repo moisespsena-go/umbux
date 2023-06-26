@@ -277,7 +277,7 @@ func Test_FuncCall(t *testing.T) {
 }
 
 func Test_FuncMapFunctionCall(t *testing.T) {
-	FuncMap["upper"] = strings.ToUpper
+	old_compiler.FuncMap["upper"] = strings.ToUpper
 
 	res, err := run(`#{ upper("test") }`, nil)
 
@@ -309,7 +309,7 @@ func Test_StructMethodCall(t *testing.T) {
 }
 
 func Test_Multiple_File_Inheritance(t *testing.T) {
-	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
+	tmpl, err := old_compiler.CompileDir("samples/", old_compiler.DefaultDirOptions, old_compiler.DefaultOptions)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -335,7 +335,7 @@ func Test_Multiple_File_Inheritance(t *testing.T) {
 }
 
 func Test_Recursion_In_Blocks(t *testing.T) {
-	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
+	tmpl, err := old_compiler.CompileDir("samples/", old_compiler.DefaultDirOptions, old_compiler.DefaultOptions)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -385,7 +385,7 @@ func Test_ConditionEvaluation(t *testing.T) {
 }
 
 func Failing_Test_CompileDir(t *testing.T) {
-	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
+	tmpl, err := old_compiler.CompileDir("samples/", old_compiler.DefaultDirOptions, old_compiler.DefaultOptions)
 
 	// Test Compilation
 	if err != nil {
@@ -417,7 +417,7 @@ func Failing_Test_CompileDir(t *testing.T) {
 	expect(doc1.String(), doc2.String(), t)
 
 	// Check against CompileFile
-	compilefile, err := CompileFile("samples/basic.ubx", DefaultOptions)
+	compilefile, err := old_compiler.CompileFile("samples/basic.ubx", old_compiler.DefaultOptions)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -445,7 +445,7 @@ func Benchmark_Parse(b *testing.B) {
 				div.right`
 
 	for i := 0; i < b.N; i++ {
-		cmp := New()
+		cmp := old_compiler.New()
 		cmp.Parse(code)
 	}
 }
@@ -468,7 +468,7 @@ func Benchmark_Compile(b *testing.B) {
 							.long ? somevar && someothervar
 				div.right`
 
-	cmp := New()
+	cmp := old_compiler.New()
 	cmp.Parse(code)
 
 	b.StartTimer()
@@ -485,7 +485,7 @@ func expect(cur, expected string, t *testing.T) {
 }
 
 func run(tpl string, data interface{}) (string, error) {
-	t, err := Compile(tpl, Options{false, false, nil, nil})
+	t, err := old_compiler.Compile(tpl, old_compiler.Options{false, false, nil, nil})
 	if err != nil {
 		return "", err
 	}
@@ -497,7 +497,7 @@ func run(tpl string, data interface{}) (string, error) {
 }
 
 func generate(tpl string) (string, error) {
-	c := New()
+	c := old_compiler.New()
 	if err := c.ParseData([]byte(tpl), "test.ubx"); err != nil {
 		return "", err
 	}
