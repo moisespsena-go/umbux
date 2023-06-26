@@ -286,20 +286,22 @@ func (n *Each) Compile(w Context, parent Node) (err error) {
 	}
 
 	w.beginLine()
-	w.write("{{ range &$state := ")
+	w.write("{{ range &$__ := ")
 
 	if err := n.Container.Compile(w, n); err != nil {
 		return err
 	}
 	w.write(" }}")
 
+	n.Parent.variable(&Variable{Name: "__"})
+
 	if n.IndexVariable != nil {
 		n.IndexVariable = n.Parent.variable(n.IndexVariable)
-		w.writef("{{ $%s = $state.Index }}", n.IndexVariable.Name)
+		w.writef("{{ $%s := $__.Index }}", n.IndexVariable.Name)
 	}
 
 	n.ElementVariable = n.Parent.variable(n.ElementVariable)
-	w.writef("{{ $%s := $state.Value }}", n.ElementVariable.Name)
+	w.writef("{{ $%s := $__.Value }}", n.ElementVariable.Name)
 
 	w.indent()
 	if err := n.Block.Compile(w, n); err != nil {
@@ -558,6 +560,22 @@ func (n *UnaryExpression) Compile(w Context, parent Node) (err error) {
 func (n *BinaryExpression) Compile(w Context, parent Node) (err error) {
 	if err := n.GraphNode.Compile(w, parent); err != nil {
 		return err
+	}
+
+	switch n.Op {
+	case "+":
+		w.write(`(`)
+		if err := n.X.Compile(w, n); err != nil {
+			return err
+		}
+
+		w.write(" + ")
+
+		if err := n.Y.Compile(w, n); err != nil {
+			return err
+		}
+		w.write(`)`)
+		return
 	}
 
 	w.writef(`(__pug_binaryop %s `, strconv.Quote(n.Op))

@@ -12,6 +12,7 @@ func main() {
 	if t, err := tfs.Open("teste.umbux"); err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println(t.Execute(os.Stdout, map[string]any{"items": []string{"a", "b"}}))
+		t.Option()
+		t.Execute(os.Stdout, map[string]any{"items": []string{"a", "b"}})
 	}
 }

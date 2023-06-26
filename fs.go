@@ -2,13 +2,13 @@ package umbux
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	iofs "io/fs"
 	"os"
 
 	"github.com/moisespsena-go/umbu/html/template"
 	"github.com/moisespsena-go/umbux/compiler"
+	"github.com/moisespsena-go/umbux/runtime"
 )
 
 type FileFinder = compiler.FileFinder
@@ -70,15 +70,26 @@ func (fs *TemplateFS) Open(name string) (t *template.Template, err error) {
 			return
 		}
 
-		fmt.Println(s)
-
 		if t, err = template.New(templateName).Parse(s); err != nil {
 			return
 		}
+
 		if err = fs.Cache.Store(templateName, fi.ModTime(), t); err != nil {
 			return
 		}
+
+		t.Funcs(runtime.FuncMap)
 	}
 
+	return
+}
+
+func (fs *TemplateFS) ExecutorOf(name string) (exc *template.Executor, err error) {
+	var t *template.Template
+	if t, err = fs.Open(name); err != nil {
+		return
+	}
+	exc = t.CreateExecutor()
+	exc.StateOptions.DotOverrideDisabled = true
 	return
 }
