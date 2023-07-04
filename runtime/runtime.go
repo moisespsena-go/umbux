@@ -175,7 +175,7 @@ func Unary(op string, x interface{}) interface{} {
 	return x
 }
 
-func ClassNames(vars ...interface{}) (string, error) {
+func ClassNames(vars ...interface{}) (template.HTML, error) {
 	var ret = ""
 
 	for _, v := range vars {
@@ -185,7 +185,7 @@ func ClassNames(vars ...interface{}) (string, error) {
 			if subnames, err := ClassNames(ax...); err != nil {
 				return "", err
 			} else if subnames != "" {
-				ret += subnames + " "
+				ret += string(subnames) + " "
 			}
 		} else if mx, ok := v.(pugmap); ok {
 			classes := []string{}
@@ -196,12 +196,12 @@ func ClassNames(vars ...interface{}) (string, error) {
 			}
 			sort.Strings(classes)
 			ret += strings.Join(classes, " ") + " "
-		} else {
+		} else if v != nil {
 			return "", fmt.Errorf("unsupported type %s used for class name", reflect.TypeOf(v))
 		}
 	}
 
-	return strings.TrimSpace(ret), nil
+	return template.HTML(strings.TrimSpace(ret)), nil
 }
 
 func Style(val interface{}) interface{} {

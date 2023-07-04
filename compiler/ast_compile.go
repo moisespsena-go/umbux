@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -157,6 +158,13 @@ func (n *Tag) fixAttributes() {
 		if attr.Name == "class" {
 			if class == nil {
 				class = attr
+				if _, ok := attr.Value.(*ObjectExpression); ok {
+					class.Value = &FunctionCallExpression{
+						GraphNode: NewNode(class.Position),
+						X:         &FieldExpression{GraphNode: NewNode(class.Position), Variable: &Variable{GraphNode: NewNode(class.Position), Name: "__pug_classnames"}},
+						Arguments: []Expression{class.Value},
+					}
+				}
 				attrs = append(attrs, attr)
 			} else {
 				strclass, sok := class.Value.(*StringExpression)
@@ -210,6 +218,25 @@ func (n *Attribute) Compile(w Context, parent Node) (err error) {
 		w.write(` }}`)
 	} else if ok {
 		w.writef(`%s="%s"`, n.Name, html.EscapeString(strAttribute.Value))
+	} else if n.Name == "class" {
+		if fn, ok := n.Value.(*FunctionCallExpression); ok {
+			if fe, ok := fn.X.(*FieldExpression); ok && fe.Variable.Name == "__pug_classnames" {
+				varName := fmt.Sprintf("$_%d", reflect.ValueOf(fe).Pointer())
+				w.writef(`{{- %s := `, varName)
+				if err := n.Value.Compile(w, n); err != nil {
+					return err
+				}
+				w.write(` }}`)
+				w.writef(`{{ if %s }} class="{{ %s }}"{{ end }}`, varName, varName)
+				return
+			}
+		}
+
+		w.writef(`%s="{{ `, n.Name)
+		if err := n.Value.Compile(w, n); err != nil {
+			return err
+		}
+		w.write(` }}"`)
 	} else {
 		w.writef(`%s="{{ `, n.Name)
 		if err := n.Value.Compile(w, n); err != nil {

@@ -3,8 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/moisespsena-go/tracederror v0.0.1 h1:mDptJq50Fnl57GW6OTPTEo6GcUaNdfVv6ysIvTc1KYI=
 github.com/moisespsena-go/tracederror v0.0.1/go.mod h1:GoEarEyWoWMIlUhR2yJ/yKaEvE9RzdsJCPckp7k8YxE=
-github.com/moisespsena-go/umbu v0.0.0-20230704153857-01e533079e7b h1:AjpVBlDPW24GRiOPkq+wGCwmZWshkyC+pn2IHh0ryB8=
-github.com/moisespsena-go/umbu v0.0.0-20230704153857-01e533079e7b/go.mod h1:1cmO8lB7/e6ycuUH5e/6Lolp7jJJKqiqhPKU5i2OLAE=
+github.com/moisespsena-go/umbu v0.0.0-20230704190441-b70faf5e2853 h1:7i9l3bC933jnI/zSEzC8FRp1rv8SdQAaj4NcjNxy1Us=
+github.com/moisespsena-go/umbu v0.0.0-20230704190441-b70faf5e2853/go.mod h1:1cmO8lB7/e6ycuUH5e/6Lolp7jJJKqiqhPKU5i2OLAE=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
