@@ -325,7 +325,7 @@ func (n *Mixin) Compile(w Context, parent Node) (err error) {
 		arg.Name = n.Parent.variable(arg.Name)
 	}
 
-	_, err = w.define(fmt.Sprintf("mixin-%s", n.Name), args, func() error {
+	_, err = w.define(fmt.Sprintf("mixin--%s", n.Name), args, func() error {
 
 		w.indent()
 		if err := n.Block.Compile(w, n); err != nil {
@@ -344,7 +344,7 @@ func (n *MixinCall) Compile(w Context, parent Node) (err error) {
 		return err
 	}
 
-	name := fmt.Sprintf("mixin-%s", n.Name)
+	name := fmt.Sprintf("mixin--%s", n.Name)
 
 	mixin, err := w.define(name, nil)
 
@@ -528,7 +528,7 @@ func (n *ObjectExpression) Compile(w Context, parent Node) (err error) {
 		return err
 	}
 
-	w.write("(map")
+	w.write("(__pug_map ")
 	for key, ex := range n.Expressions {
 		w.write(" ")
 		w.write(strconv.Quote(key))
@@ -690,7 +690,7 @@ func (n *Block) Compile(w Context, parent Node) (err error) {
 	}
 
 	if root.Extends == nil {
-		_, err := w.define(fmt.Sprintf("%s", n.Name), nil, func() error {
+		_, err := w.define(fmt.Sprintf("block--%s", n.Name), nil, func() error {
 			return renderBlock()
 		})
 
@@ -698,12 +698,12 @@ func (n *Block) Compile(w Context, parent Node) (err error) {
 			return err
 		}
 
-		w.writeLinef("{{ template %s . }}", strconv.Quote(n.Name))
+		w.writeLinef("{{ template %s . }}", strconv.Quote("block--"+n.Name))
 	} else {
 		if def, err := w.define(fmt.Sprintf("%s", n.Name), nil); err != nil {
 			return err
 		} else if def != nil {
-			_, err := w.define(fmt.Sprintf("%s", n.Name), nil, func() error {
+			_, err := w.define(fmt.Sprintf("block--%s", n.Name), nil, func() error {
 				if n.Modifier == "prepend" {
 					if err := renderBlock(); err != nil {
 						return err

@@ -1,4 +1,0 @@
-extends recursion.parent.ubx
-
-block main
-    block inner

@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/moisespsena-go/umbux"
 )
 
 var prettyPrint bool
@@ -23,25 +25,21 @@ func main() {
 	input := flag.Arg(0)
 
 	if len(input) == 0 {
-		fmt.Fprintln(os.Stderr, "Please provide an input file. (umbuxc input.umbux)")
+		fmt.Fprintln(os.Stderr, "Please provide an input file. (umbuxc input.pug)")
 		os.Exit(1)
 	}
 
-	cmp := old_compiler.New()
-	cmp.PrettyPrint = prettyPrint
-	cmp.LineNumbers = lineNumbers
-
-	err := cmp.ParseFile(input)
-
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-
-	err = cmp.CompileWriter(os.Stdout)
-
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	tfs := umbux.NewTemplateFS(umbux.NewFinderFS(os.DirFS(".")), umbux.NoCache, umbux.Options{true, true, nil})
+	if t, err := tfs.Open(input); err != nil {
+		fmt.Println(err)
+	} else {
+		t.Option()
+		err := t.Execute(os.Stdout, map[string]any{"items": []string{"a", "b"}, "foo": func(args ...interface{}) interface{} {
+			return args[0]
+		}})
+		if err != nil {
+			fmt.Fprint(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
 }

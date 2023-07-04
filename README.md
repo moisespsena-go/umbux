@@ -234,13 +234,13 @@ Template data, variables, expressions, etc., can all be passed as arguments:
 
 A template can import other templates using `import`:
 
-    a.ubx
+    a.pug
         p this is template a
 
-    b.ubx
+    b.pug
         p this is template b
 
-    c.ubx
+    c.pug
         div
             import a
             import b
@@ -256,7 +256,7 @@ gets compiled to
 A template can inherit other templates. In order to inherit another template, an `extends` keyword should be used.
 Parent template can define several named blocks and child template can modify the blocks.
 
-    master.ubx
+    master.pug
         !!! 5
         html
             head
@@ -269,7 +269,7 @@ Parent template can define several named blocks and child template can modify th
             body
                 block content
 
-    subpage.ubx
+    subpage.pug
         extends master
 
         block title
@@ -299,7 +299,7 @@ THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ```go
 var DefaultOptions = Options{true, false}
-var DefaultDirOptions = DirOptions{".ubx", true}
+var DefaultDirOptions = DirOptions{".pug", true}
 ```
 
 #### func  Compile
@@ -329,16 +329,16 @@ Parses and compiles the contents of a supplied directory name. Returns a mapping
 If there are templates in subdirectories, its key in the map will be it's path relative to `dirname`. For example:
 ```
 templates/
-   |-- index.ubx
+   |-- index.pug
    |-- layouts/
-         |-- base.ubx
+         |-- base.pug
 ```
 ```go
 templates, err := umbux.CompileDir("templates/", umbux.DefaultDirOptions, umbux.DefaultOptions)
 templates["index"] // index.umbux Go Template
 templates["layouts/base"] // base.umbux Go Template
 ```
-By default, the search will be recursive and will match only files ending in ".ubx". If recursive is turned off, it will only search the top level of the directory. Specified extension must start with a period.
+By default, the search will be recursive and will match only files ending in ".pug". If recursive is turned off, it will only search the top level of the directory. Specified extension must start with a period.
 
 #### type Compiler
 
@@ -355,7 +355,7 @@ to native Go template.
 
     compiler := umbux.New()
     // Parse the input file
-    err := compiler.ParseFile("./input.ubx")
+    err := compiler.ParseFile("./input.pug")
     if err == nil {
     	// Compile input file to Go template
     	tpl, err := compiler.Compile()

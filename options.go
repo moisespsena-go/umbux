@@ -28,5 +28,5 @@ type DirOptions struct {
 // DefaultOptions sets pretty-printing to true and line numbering to false.
 var DefaultOptions = Options{true, false, nil}
 
-// DefaultDirOptions sets expected file extension to ".ubx" and recursive search for templates within a directory to true.
-var DefaultDirOptions = DirOptions{".ubx", true}
+// DefaultDirOptions sets expected file extension to ".pug" and recursive search for templates within a directory to true.
+var DefaultDirOptions = DirOptions{".pug", true}

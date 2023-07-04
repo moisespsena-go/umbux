@@ -1,4 +1,0 @@
-extends recursion.extends.ubx
-
-block inner
-    | content

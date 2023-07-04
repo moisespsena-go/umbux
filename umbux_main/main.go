@@ -9,10 +9,13 @@ import (
 
 func main() {
 	tfs := umbux.NewTemplateFS(umbux.NewFinderFS(os.DirFS(".")), umbux.NoCache, umbux.Options{false, false, nil})
-	if t, err := tfs.Open("teste.umbux"); err != nil {
+	if t, err := tfs.Open("examples/mixin.pug"); err != nil {
 		fmt.Println(err)
 	} else {
 		t.Option()
-		t.Execute(os.Stdout, map[string]any{"items": []string{"a", "b"}})
+		err := t.Execute(os.Stdout, map[string]any{"items": []string{"a", "b"}, "foo": func(args ...interface{}) interface{} {
+			return args[0]
+		}})
+		fmt.Println(err)
 	}
 }

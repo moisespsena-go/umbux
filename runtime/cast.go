@@ -20,6 +20,20 @@ func makeInt(val interface{}) (int64, bool) {
 	return 0, false
 }
 
+func makeUint(val interface{}) (uint64, bool) {
+	rval := reflect.ValueOf(val)
+	switch rval.Kind() {
+	case reflect.Uint, reflect.Uint32, reflect.Uint64, reflect.Uint16, reflect.Uint8:
+		return rval.Uint(), true
+	case reflect.String:
+		if ival, err := strconv.ParseUint(rval.String(), 10, 64); err == nil {
+			return ival, true
+		}
+	}
+
+	return 0, false
+}
+
 func makeFloat(val interface{}) (float64, bool) {
 	rval := reflect.ValueOf(val)
 	switch rval.Kind() {

@@ -1,0 +1,13 @@
+h1 Pug - node template engine
+#container.col( attr="foo" attr2!="bar",  class={active: Foo > 0})
+  if youAreUsingPug
+    p You are amazing
+  else
+    p Get on it!
+  p(style="color: green") #{foo("string", 11)}
+  p.
+    Pug is a terse and simple templating language with a
+    strong focus on performance and powerful features.
+
+each item, i in items
+  p(class=i % 2 == 0 ? "even" : "odd") #{item}

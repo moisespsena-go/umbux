@@ -2,6 +2,7 @@ package umbux
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	iofs "io/fs"
 	"os"
@@ -69,6 +70,8 @@ func (fs *TemplateFS) Open(name string) (t *template.Template, err error) {
 		if s, err = ctx.Compile(root); err != nil {
 			return
 		}
+
+		fmt.Println(s)
 
 		if t, err = template.New(templateName).Parse(s); err != nil {
 			return
