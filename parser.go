@@ -2,7 +2,6 @@ package umbux
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	iofs "io/fs"
 	"path"
@@ -36,8 +35,6 @@ func Parse(opts *Options, finder compiler.FileFinder, name string, r io.Reader) 
 	if s, err = ctx.Compile(root); err != nil {
 		return
 	}
-
-	fmt.Println(s)
 
 	if t, err = template.New(name).Parse(s); err != nil {
 		return
