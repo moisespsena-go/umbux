@@ -646,7 +646,7 @@ func (n *Import) Compile(w Context, parent Node) (err error) {
 	if ast, err := w.ParseFile(file); err != nil {
 		return err
 	} else {
-		_, err = w.define(file, nil, nil, func() error {
+		_, err = w.define(file, nil, func() error {
 			return ast.Compile(w, root)
 		})
 

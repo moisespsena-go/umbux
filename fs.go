@@ -1,9 +1,6 @@
 package umbux
 
 import (
-	"bytes"
-	"fmt"
-	"io"
 	iofs "io/fs"
 	"os"
 
@@ -12,9 +9,11 @@ import (
 	"github.com/moisespsena-go/umbux/runtime"
 )
 
-type FileFinder = compiler.FileFinder
-
-type FinderFS = compiler.FinderFS
+type (
+	FileFindWalker = compiler.FileFindWalker
+	FileFinder     = compiler.FileFinder
+	FinderFS       = compiler.FinderFS
+)
 
 func NewFinderFS(FS iofs.FS) *FinderFS {
 	return &FinderFS{FS: FS}
@@ -48,32 +47,7 @@ func (fs *TemplateFS) Open(name string) (t *template.Template, err error) {
 
 	t = fs.Cache.Get(templateName, fi.ModTime())
 	if t == nil {
-		var data []byte
-		if data, err = io.ReadAll(f); err != nil {
-			return
-		}
-
-		indentString := ""
-
-		if fs.Options.PrettyPrint {
-			indentString = "  "
-		}
-
-		ctx := compiler.NewContext(fs.Finder, indentString)
-
-		var root *compiler.Root
-		if root, err = ctx.ParseReader(name, bytes.NewBuffer(data)); err != nil {
-			return
-		}
-
-		var s string
-		if s, err = ctx.Compile(root); err != nil {
-			return
-		}
-
-		fmt.Println(s)
-
-		if t, err = template.New(templateName).Parse(s); err != nil {
+		if t, err = Parse(&fs.Options, fs.Finder, templateName, f); err != nil {
 			return
 		}
 

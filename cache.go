@@ -13,14 +13,25 @@ type (
 	}
 	noCache struct {
 	}
+
+	MemCache map[string]*template.Template
 )
 
 var NoCache noCache
 
-func (noCache) Get(name string, mod time.Time) *template.Template {
+func (noCache) Get(string, time.Time) *template.Template {
 	return nil
 }
 
-func (noCache) Store(name string, mod time.Time, tmpl *template.Template) error {
+func (noCache) Store(string, time.Time, *template.Template) error {
+	return nil
+}
+
+func (m MemCache) Get(name string, _ time.Time) *template.Template {
+	return m[name]
+}
+
+func (m MemCache) Store(name string, _ time.Time, tmpl *template.Template) error {
+	m[name] = tmpl
 	return nil
 }
