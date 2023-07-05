@@ -727,7 +727,7 @@ func (n *Block) Compile(w Context, parent Node) (err error) {
 
 		w.writeLinef("{{ template %s . }}", strconv.Quote("block--"+n.Name))
 	} else {
-		if def, err := w.define(fmt.Sprintf("%s", n.Name), nil); err != nil {
+		if def, err := w.define(fmt.Sprintf("block--%s", n.Name), nil); err != nil {
 			return err
 		} else if def != nil {
 			_, err := w.define(fmt.Sprintf("block--%s", n.Name), nil, func() error {

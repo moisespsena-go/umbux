@@ -15,6 +15,8 @@ type Options struct {
 	// If set, when identifier matches key, disable to DIT convertion.
 	// Default: nil
 	BuiltinFuncsNames map[string]any
+	// IndentString set the indent string
+	IndentString string
 }
 
 // DirOptions is used to provide options to directory compilation.
@@ -26,7 +28,7 @@ type DirOptions struct {
 }
 
 // DefaultOptions sets pretty-printing to true and line numbering to false.
-var DefaultOptions = Options{true, false, nil}
+var DefaultOptions = Options{true, false, nil, ""}
 
 // DefaultDirOptions sets expected file extension to ".pug" and recursive search for templates within a directory to true.
 var DefaultDirOptions = DirOptions{".pug", true}

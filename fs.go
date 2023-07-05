@@ -47,7 +47,12 @@ func (fs *TemplateFS) Open(name string) (t *template.Template, err error) {
 
 	t = fs.Cache.Get(templateName, fi.ModTime())
 	if t == nil {
-		if t, err = Parse(&fs.Options, fs.Finder, templateName, f); err != nil {
+		var compiled string
+		if compiled, err = CompileReader(&fs.Options, fs.Finder, templateName, f); err != nil {
+			return
+		}
+
+		if t, err = NewTemplate(templateName, compiled); err != nil {
 			return
 		}
 
@@ -67,6 +72,5 @@ func (fs *TemplateFS) ExecutorOf(name string) (exc *template.Executor, err error
 		return
 	}
 	exc = t.CreateExecutor()
-	exc.StateOptions.DotOverrideDisabled = true
 	return
 }
