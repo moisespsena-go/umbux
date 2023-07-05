@@ -66,7 +66,7 @@ func CompileFS(options *Options, fs iofs.FS, cb func(name string, compiled *stri
 		if s, err = CompileReader(options, finder, templateName, f); err == nil {
 			err = cb(templateName, &s)
 		}
-		return nil
+		return
 	})
 	return
 }
